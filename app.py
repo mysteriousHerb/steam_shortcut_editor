@@ -5,6 +5,8 @@ import os.path
 from PIL import Image, ImageTk
 from io import BytesIO
 from read_vdf import ShortcutConverter
+import shutil
+
 
 
 # create a gui that can display image from URL
@@ -15,6 +17,7 @@ from read_vdf import ShortcutConverter
 class GUI():
     def __init__(self):
         self.shortcut_converter = ShortcutConverter()
+        self.shortcut_path = "shortcuts.vdf"
 
     def download_image(self, url):
         # download image
@@ -48,14 +51,51 @@ class GUI():
                 self.window["-APPID_LIST-"].update(self.appid_list)
                 self.img_url_list = [result["image_url"] for result in sanitised_results]
 
-    def load_shortcut(self, shortcut_path):
-        self.shortcuts, self.shortcut_names= self.shortcut_converter.load_shortcut("shortcuts.vdf")
+    def load_shortcut(self):
+        self.shortcuts, self.shortcut_names= self.shortcut_converter.load_shortcut(self.shortcut_path)
         # append a 1# to the front of the shortcut name to prevent duplicates
         self.shortcut_names= [f"{i}#{name}" for i, name in enumerate(self.shortcut_names)]
 
         self.window["-SHORTCUT_LIST-"].update(self.shortcut_names)
 
-    # def manual_update_shortcut(self, index, name):
+    def backup_shortcut(self):
+        shutil.copyfile(self.shortcut_path, self.shortcut_path.replace(".vdf", "_backup.vdf"))
+
+
+    def refresh_selection(self, mode):
+        if mode == "shortcut_list":
+            if len(self.values["-SHORTCUT_LIST-"]) > 0:
+                # default to select the first game of the list
+                self.window["-APPID_LIST-"].update(set_to_index=0)
+                self.window["-GAMENAME_LIST-"].update(set_to_index=0)
+                img_url = self.img_url_list[0]
+                png_data = self.download_image(img_url)
+                self.window["-IMAGE-"].update(data=png_data)
+                
+
+
+        if mode == "gamename_list":
+            if len(self.values["-GAMENAME_LIST-"]) > 0:
+                selected = self.values["-GAMENAME_LIST-"]
+                indexes = [self.steam_game_name_list.index(i) for i in selected]
+                self.window["-APPID_LIST-"].update(set_to_index=indexes)
+                # update image
+                img_url = self.img_url_list[indexes[0]]
+                png_data = self.download_image(img_url)
+                self.window["-IMAGE-"].update(data=png_data)
+
+        elif mode == "appid_list":
+            # prevent clicking empty list
+            if len(self.values["-APPID_LIST-"]) > 0:
+                selected = self.values["-APPID_LIST-"]
+                indexes = [self.appid_list.index(i) for i in selected]
+                self.window["-GAMENAME_LIST-"].update(set_to_index=indexes)
+                # update image
+                img_url = self.img_url_list[indexes[0]]
+                png_data = self.download_image(img_url)
+                self.window["-IMAGE-"].update(data=png_data)
+        pass
+
 
     def replace_name(self):
         if len(self.values["-SHORTCUT_LIST-"]) > 0:
@@ -64,16 +104,16 @@ class GUI():
             
             if len(self.values["-MANUAL_NAME-"]) > 0:
                 manual_game_name = self.values["-MANUAL_NAME-"]
-                self.shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, game_name=manual_game_name)
-                self.load_shortcut("shortcuts.vdf")
+                self.shortcut_converter.modify_shortcut(self.shortcut_path, shortcut_index, game_name=manual_game_name)
+                self.load_shortcut(self.shortcut_path)
                 self.window["-MANUAL_NAME-"].update("")
                 
             if len(self.values["-GAMENAME_LIST-"]) > 0:
                 selected_game = self.values["-GAMENAME_LIST-"][0]
                 # replace the game name
-                self.shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, game_name=selected_game)
+                self.shortcut_converter.modify_shortcut(self.shortcut_path, shortcut_index, game_name=selected_game)
                 # reload the shortcut
-                self.load_shortcut("shortcuts.vdf")
+                self.load_shortcut()
 
     def replace_appid(self):
         if len(self.values["-SHORTCUT_LIST-"]) > 0:
@@ -83,9 +123,11 @@ class GUI():
             if len(self.values["-APPID_LIST-"]) > 0:
                 selected_appid = self.values["-APPID_LIST-"][0]
                 # replace the game name
-                self.shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, appid=selected_appid)
+                self.shortcut_converter.modify_shortcut(self.shortcut_path, shortcut_index, appid=selected_appid)
                 # reload the shortcut
-                self.load_shortcut("shortcuts.vdf")
+                self.load_shortcut()
+
+
 
     def app_window(self):
         # Define the window's contents
@@ -93,6 +135,12 @@ class GUI():
         shortcut_converter = ShortcutConverter()
 
         top_row = [
+            [
+                sg.Text(".vdf Path"),
+                sg.Input(self.shortcut_path, key="-SHORTCUT_PATH-", enable_events=True),
+                sg.FileBrowse("Browse", key="-SHORTCUT_PATH-"),
+                sg.Button("Backup shortcuts", key="-BACKUP_SHORTCUT-"),
+            ],
             [
                 sg.Button("Load non-steam games", key="-LOAD_SHORTCUT-"),
                 sg.Button("Update gamename", key="-REPLACE_NAME-"),
@@ -137,7 +185,8 @@ class GUI():
         game_name_list = appid_list = []
         # Create the window
         self.window = sg.Window("Steam shortcut manager", layout, resizable=True, size=(900, 400))
-
+        
+        
         # Display and interact with the Window using an Event Loop
         while True:
             self.event, self.values = self.window.read()
@@ -145,10 +194,14 @@ class GUI():
             if self.event == "Quit" or self.event == sg.WIN_CLOSED:
                 break
             if self.event == "-LOAD_SHORTCUT-":
-                self.load_shortcut("shortcuts.vdf")
+                self.load_shortcut()
+            if self.event == "-BACKUP_SHORTCUT-":
+                self.backup_shortcut()
 
             if self.event == "-SHORTCUT_LIST-":
                 self.find_steam_game()
+                self.refresh_selection("shortcut_list")
+
             # update the game name
             if self.event == "-REPLACE_NAME-":
                 self.replace_name()
@@ -159,27 +212,18 @@ class GUI():
             if self.event == "-MANUAL_REPLACE_NAME-":
                 self.replace_name()
 
+            if self.event == "-SHORTCUT_PATH-":
+                self.shortcut_path = self.values["-SHORTCUT_PATH-"]
+                if os.path.exists(self.shortcut_path):
+                    self.load_shortcut()
+
             if self.event == "-GAMENAME_LIST-":
+                self.refresh_selection(mode="gamename_list")
                 # prevent clicking empty list
-                if len(self.values["-GAMENAME_LIST-"]) > 0:
-                    selected = self.values["-GAMENAME_LIST-"]
-                    indexes = [self.steam_game_name_list.index(i) for i in selected]
-                    self.window["-APPID_LIST-"].update(set_to_index=indexes)
-                    # update image
-                    img_url = self.img_url_list[indexes[0]]
-                    png_data = self.download_image(img_url)
-                    self.window["-IMAGE-"].update(data=png_data)
+
 
             if self.event == "-APPID_LIST-":
-                # prevent clicking empty list
-                if len(self.values["-APPID_LIST-"]) > 0:
-                    selected = self.values["-APPID_LIST-"]
-                    indexes = [appid_list.index(i) for i in selected]
-                    self.window["-GAMENAME_LIST-"].update(set_to_index=indexes)
-                    # update image
-                    img_url = self.img_url_list[indexes[0]]
-                    png_data = self.download_image(img_url)
-                    self.window["-IMAGE-"].update(data=png_data)
+                self.refresh_selection(mode="appid_list")
 
         self.window.close()
 
