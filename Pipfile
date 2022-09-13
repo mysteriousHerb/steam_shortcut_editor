@@ -10,6 +10,7 @@ beautifulsoup4 = "*"
 pysimplegui = "*"
 pillow = "*"
 pyinstaller = "*"
+psgcompiler = "*"
 
 [dev-packages]
 black = "*"

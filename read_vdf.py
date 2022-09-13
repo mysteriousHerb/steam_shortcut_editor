@@ -55,6 +55,8 @@ class ShortcutConverter():
 
         # find the element by id=search_resultsRows
         search_results_rows = soup.find(id="search_resultsRows")
+        if not search_results_rows:
+            return [{"game_name": "", "appid": "", "image_url": ""}]
         # find all the divs with class name "search_result_row"
         search_result_rows = search_results_rows.find_all("a", class_="search_result_row")
         sanitised_results = []
@@ -105,7 +107,7 @@ class ShortcutConverter():
             r = requests.get(url, allow_redirects=True)
             open('steam_applist.json', 'wb+').write(r.content)
 
-        with open('applist.json', encoding="UTF-8") as f:
+        with open('steam_applist.json', encoding="UTF-8") as f:
             steam_applist = json.load(f)
             self.steam_applist = steam_applist["applist"]["apps"]
             self.applist_names = [i["name"] for i in self.steam_applist]

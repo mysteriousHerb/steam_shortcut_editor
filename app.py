@@ -21,6 +21,8 @@ class GUI():
 
     def download_image(self, url):
         # download image
+        if url == "":
+            url = "https://cdn.cloudflare.steamstatic.com/steam/bundles/23298/z3zxfi0uzu461hup/capsule_sm_120.jpg?t=1639599437"
         response = requests.get(url)
         # use pillow to convert the image as png
         img = Image.open(BytesIO(response.content))
@@ -97,23 +99,23 @@ class GUI():
         pass
 
 
-    def replace_name(self):
+    def replace_name(self, mode="manual"):
         if len(self.values["-SHORTCUT_LIST-"]) > 0:
             selected = self.values["-SHORTCUT_LIST-"][0]
             shortcut_index = self.shortcut_names.index(selected)
-            
-            if len(self.values["-MANUAL_NAME-"]) > 0:
-                manual_game_name = self.values["-MANUAL_NAME-"]
-                self.shortcut_converter.modify_shortcut(self.shortcut_path, shortcut_index, game_name=manual_game_name)
-                self.load_shortcut(self.shortcut_path)
-                self.window["-MANUAL_NAME-"].update("")
-                
-            if len(self.values["-GAMENAME_LIST-"]) > 0:
-                selected_game = self.values["-GAMENAME_LIST-"][0]
-                # replace the game name
-                self.shortcut_converter.modify_shortcut(self.shortcut_path, shortcut_index, game_name=selected_game)
-                # reload the shortcut
-                self.load_shortcut()
+            if mode == "manual":
+                if len(self.values["-MANUAL_NAME-"]) > 0:
+                    manual_game_name = self.values["-MANUAL_NAME-"]
+                    self.shortcut_converter.modify_shortcut(self.shortcut_path, shortcut_index, game_name=manual_game_name)
+                    self.load_shortcut()
+                    self.window["-MANUAL_NAME-"].update("")
+            elif mode == "gamename_list":
+                if len(self.values["-GAMENAME_LIST-"]) > 0:
+                    selected_game = self.values["-GAMENAME_LIST-"][0]
+                    # replace the game name
+                    self.shortcut_converter.modify_shortcut(self.shortcut_path, shortcut_index, game_name=selected_game)
+                    # reload the shortcut
+                    self.load_shortcut()
 
     def replace_appid(self):
         if len(self.values["-SHORTCUT_LIST-"]) > 0:
@@ -157,13 +159,13 @@ class GUI():
             [sg.Text("Shortcut")],
             [
                 # add a label
-                sg.Listbox(values=[], size=(30, 20), key="-SHORTCUT_LIST-", enable_events=True)
+                sg.Listbox(values=[], size=(30, 20), key="-SHORTCUT_LIST-", enable_events=True, horizontal_scroll=True)
             ],
         ]
         column_2 = [
             [sg.Text("Steam game name")],
             [
-                sg.Listbox(values=[], size=(30, 20), key="-GAMENAME_LIST-", enable_events=True),
+                sg.Listbox(values=[], size=(30, 20), key="-GAMENAME_LIST-", enable_events=True, horizontal_scroll=True),
             ],
         ]
 
@@ -201,16 +203,18 @@ class GUI():
             if self.event == "-SHORTCUT_LIST-":
                 self.find_steam_game()
                 self.refresh_selection("shortcut_list")
+                # change MANUAL_NAME to the selected game name
+                self.window["-MANUAL_NAME-"].update(self.values["-SHORTCUT_LIST-"][0].split("#")[1])
 
             # update the game name
             if self.event == "-REPLACE_NAME-":
-                self.replace_name()
+                self.replace_name(mode="gamename_list")
             
             if self.event == "-REPLACE_APPID-":
                 self.replace_appid()
 
             if self.event == "-MANUAL_REPLACE_NAME-":
-                self.replace_name()
+                self.replace_name(mode="manual")
 
             if self.event == "-SHORTCUT_PATH-":
                 self.shortcut_path = self.values["-SHORTCUT_PATH-"]
