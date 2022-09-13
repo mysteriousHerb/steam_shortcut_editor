@@ -38,23 +38,23 @@ class ShortcutConverter():
         # find class name ais-Hits-list
         # print(soup)
         # save soup as html
-        with open('steamdb.html', 'w+', encoding="UTF-8") as f:
+        with open('steam_search.html', 'w+', encoding="UTF-8") as f:
             f.write(soup.prettify())
 
         # find the element by id=search_resultsRows
         search_results_rows = soup.find(id="search_resultsRows")
         # find all the divs with class name "search_result_row"
         search_result_rows = search_results_rows.find_all("a", class_="search_result_row")
-        for row in search_result_rows[:1]:
-            steam_game_name = row.find("span", class_="title").text
-            steam_appid = row["data-ds-appid"]
-            image_url = row.find("img")["src"]
-            # if the game name is too different, discard the result
-            if jellyfish.jaro_distance(steam_game_name.lower(), game_name.lower()) > 0.7:
-                print(f"Finding {game_name} @steam: {steam_game_name} - AppID: {steam_appid}: Image URL: {image_url}")
-            else:
-                print(f"Cannot find game {game_name} on steam")
-
+        sanitised_results = []
+        for row in search_result_rows[:5]:
+            try: 
+                steam_game_name = row.find("span", class_="title").text
+                steam_appid = row["data-ds-appid"]
+                image_url = row.find("img")["src"]
+                sanitised_results.append({"game_name": steam_game_name, "appid": steam_appid, "image_url": image_url})
+            except KeyError:
+                pass
+        return sanitised_results
 
     def search_appid(self, appid):
         # load steam app list if self.applist doesnt exist
@@ -62,10 +62,26 @@ class ShortcutConverter():
             self.load_steam_applist()
         # search for the game id
         try:
-            game_name = self.applist_names[self.applist_appids.index(appid)]
-            print(f"Game Name: {game_name}: steam_AppID: {appid}")
+            game_name = self.applist_names[self.applist_appids.index(int(appid))]
         except ValueError:
             print(f"Game ID {appid} not found")
+            return [{"game_name": "", "appid": "", "image_url": ""}]
+        
+        print(f"Game Name: {game_name}: steam_AppID: {appid}")
+        # load the steam game page
+        url = f"https://store.steampowered.com/app/{appid}"
+        headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0"}
+        soup = BeautifulSoup(requests.get(url, headers=headers).text, 'html.parser')
+
+        # find class of img_ctn
+        img_ctn = soup.find(class_="game_header_image_ctn")  
+        # if there is age check, then class will be different
+        if not img_ctn:
+            img_ctn = soup.find(class_="img_ctn")
+        # find image url
+        image_url = img_ctn.find("img")["src"]
+
+        return [{"game_name": game_name, "appid": appid, "image_url": image_url}]
 
 
     def load_steam_applist(self):
@@ -87,7 +103,7 @@ class ShortcutConverter():
 
 if __name__ == "__main__":
     shortcut_converter = ShortcutConverter()
-    # shortcut_converter.search_game_name("control")
+    shortcut_converter.search_game_name("control")
     # shortcut_converter.search_appid(1174180)
-    shortcut_converter.convert_shortcut("shortcuts.vdf")
+    # shortcut_converter.convert_shortcut("shortcuts.vdf")
 

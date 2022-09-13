@@ -5,6 +5,7 @@ import requests
 import os
 import time
 
-match_results = sgdb.search_game("witcher3")
-print(match_results)
-
+shortcut_path = "shortcuts.vdf"
+with open(shortcut_path, 'rb') as appinfo:
+    shortcuts = vdf.binary_loads(appinfo.read())["shortcuts"]
+    print(shortcuts)
