@@ -1,0 +1,73 @@
+"SavedData"
+{
+	"gamelist"		"internet"
+	"Filters"
+	{
+		"InternetGames"
+		{
+			"game"		""
+			"appid"		"0"
+			"map"		""
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+		}
+		"FavoriteGames"
+		{
+			"game"		""
+			"appid"		"0"
+			"map"		""
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+		}
+		"HistoryGames"
+		{
+			"game"		""
+			"appid"		"0"
+			"map"		""
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+		}
+		"SpectateGames"
+		{
+			"game"		""
+			"appid"		"0"
+			"map"		""
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+		}
+		"LanGames"
+		{
+			"game"		""
+			"appid"		"0"
+			"map"		""
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+		}
+		"FriendsGames"
+		{
+			"game"		""
+			"appid"		"0"
+			"map"		""
+			"ping"		"0"
+			"NoFull"		"0"
+			"NoEmpty"		"0"
+			"NoPassword"		"0"
+			"Secure"		"0"
+		}
+	}
+}
