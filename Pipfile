@@ -8,6 +8,7 @@ vdf = "*"
 python-steamgriddb = "*"
 requests = "*"
 beautifulsoup4 = "*"
+jellyfish = "*"
 
 [dev-packages]
 

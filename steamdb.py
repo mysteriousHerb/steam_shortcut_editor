@@ -36,4 +36,4 @@ def search_game(game_name):
 # https://steamdb.info/instantsearch/?query={}
 
 
-search_game("control")
+search_game("LegionCraft")
