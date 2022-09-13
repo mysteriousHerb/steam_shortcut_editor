@@ -5,13 +5,11 @@ name = "pypi"
 
 [packages]
 vdf = "*"
-python-steamgriddb = "*"
 requests = "*"
 beautifulsoup4 = "*"
-jellyfish = "*"
 pysimplegui = "*"
-psgdemos = "*"
 pillow = "*"
+pyinstaller = "*"
 
 [dev-packages]
 black = "*"
