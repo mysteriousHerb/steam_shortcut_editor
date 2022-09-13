@@ -55,6 +55,38 @@ class GUI():
 
         self.window["-SHORTCUT_LIST-"].update(self.shortcut_names)
 
+    # def manual_update_shortcut(self, index, name):
+
+    def replace_name(self):
+        if len(self.values["-SHORTCUT_LIST-"]) > 0:
+            selected = self.values["-SHORTCUT_LIST-"][0]
+            shortcut_index = self.shortcut_names.index(selected)
+            
+            if len(self.values["-MANUAL_NAME-"]) > 0:
+                manual_game_name = self.values["-MANUAL_NAME-"]
+                self.shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, game_name=manual_game_name)
+                self.load_shortcut("shortcuts.vdf")
+                self.window["-MANUAL_NAME-"].update("")
+                
+            if len(self.values["-GAMENAME_LIST-"]) > 0:
+                selected_game = self.values["-GAMENAME_LIST-"][0]
+                # replace the game name
+                self.shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, game_name=selected_game)
+                # reload the shortcut
+                self.load_shortcut("shortcuts.vdf")
+
+    def replace_appid(self):
+        if len(self.values["-SHORTCUT_LIST-"]) > 0:
+            selected = self.values["-SHORTCUT_LIST-"][0]
+            shortcut_index = self.shortcut_names.index(selected)
+            # which game to replace with?
+            if len(self.values["-APPID_LIST-"]) > 0:
+                selected_appid = self.values["-APPID_LIST-"][0]
+                # replace the game name
+                self.shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, appid=selected_appid)
+                # reload the shortcut
+                self.load_shortcut("shortcuts.vdf")
+
     def app_window(self):
         # Define the window's contents
 
@@ -66,6 +98,11 @@ class GUI():
                 sg.Button("Update gamename", key="-REPLACE_NAME-"),
                 sg.Button("Update appid", key="-REPLACE_APPID-"),
                 sg.Button("Quit"),
+            ], 
+            [
+                # add a input field
+                sg.Button("Change name manually", key="-MANUAL_REPLACE_NAME-"),
+                sg.Input(key="-MANUAL_NAME-"),
             ]
         ]
         column_1 = [
@@ -99,7 +136,7 @@ class GUI():
 
         game_name_list = appid_list = []
         # Create the window
-        self.window = sg.Window("Steam shortcut manager", layout, resizable=True, size=(1000, 200))
+        self.window = sg.Window("Steam shortcut manager", layout, resizable=True, size=(900, 400))
 
         # Display and interact with the Window using an Event Loop
         while True:
@@ -114,31 +151,13 @@ class GUI():
                 self.find_steam_game()
             # update the game name
             if self.event == "-REPLACE_NAME-":
-                # which entry to update?
-                if len(self.values["-SHORTCUT_LIST-"]) > 0:
-                    selected = self.values["-SHORTCUT_LIST-"][0]
-                    shortcut_index = self.shortcut_names.index(selected)
-                    # index = 
-                    # which game to replace with?
-                    if len(self.values["-GAMENAME_LIST-"]) > 0:
-                        selected_game = self.values["-GAMENAME_LIST-"][0]
-                        # replace the game name
-                        shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, game_name=selected_game)
-                        # reload the shortcut
-                        self.load_shortcut("shortcuts.vdf")
+                self.replace_name()
             
             if self.event == "-REPLACE_APPID-":
-                # which entry to update?
-                if len(self.values["-SHORTCUT_LIST-"]) > 0:
-                    selected = self.values["-SHORTCUT_LIST-"][0]
-                    shortcut_index = self.shortcut_names.index(selected)
-                    # which game to replace with?
-                    if len(self.values["-APPID_LIST-"]) > 0:
-                        selected_appid = self.values["-APPID_LIST-"][0]
-                        # replace the game name
-                        shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, appid=selected_appid)
-                        # reload the shortcut
-                        self.load_shortcut("shortcuts.vdf")
+                self.replace_appid()
+
+            if self.event == "-MANUAL_REPLACE_NAME-":
+                self.replace_name()
 
             if self.event == "-GAMENAME_LIST-":
                 # prevent clicking empty list

@@ -1,16 +1,10 @@
 import vdf
-from steamgrid import SteamGridDB
 import json
 import requests
 import os
 import time
-
-import requests
 from bs4 import BeautifulSoup
 import os, sys
-
-import jellyfish
-
 
 # create a new class
 class ShortcutConverter():
@@ -29,6 +23,7 @@ class ShortcutConverter():
             shortcuts[str(index)]["AppName"] = game_name
         if appid:
             shortcuts[str(index)]["AppName"] = appid
+
         dump = vdf.binary_dumps({"shortcuts": shortcuts})
         with open(shortcut_path, 'wb+') as appinfo:
             appinfo.write(dump)
@@ -83,8 +78,8 @@ class ShortcutConverter():
         except ValueError:
             print(f"Game ID {appid} not found")
             return [{"game_name": "", "appid": "", "image_url": ""}]
-        
-        print(f"Game Name: {game_name}: steam_AppID: {appid}")
+        # print(f"Game Name: {game_name}: steam_AppID: {appid}")
+
         # load the steam game page
         url = f"https://store.steampowered.com/app/{appid}"
         headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0"}
