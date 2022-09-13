@@ -17,9 +17,26 @@ class ShortcutConverter():
     def __init__(self):
         pass
 
-    def convert_shortcut(self, shortcut_path):
+    def load_shortcut(self, shortcut_path):
         with open(shortcut_path, 'rb') as appinfo:
             shortcuts = vdf.binary_loads(appinfo.read())["shortcuts"]
+            shortcut_names = [i["AppName"] for i in shortcuts.values()]
+        return shortcuts, shortcut_names
+
+    def modify_shortcut(self, shortcut_path, index, game_name=None, appid=None):
+        shortcuts, shortcut_names = self.load_shortcut(shortcut_path)
+        if game_name:
+            shortcuts[str(index)]["AppName"] = game_name
+        if appid:
+            shortcuts[index]["AppName"] = appid
+        with open(shortcut_path, 'wb+') as appinfo:
+            # get back to the oriignal data format
+            vdf.binary_dumps({"shortcuts": shortcuts}, appinfo)
+
+
+    def convert_shortcut(self, shortcut_path):
+        shortcuts = self.load_shortcut(shortcut_path)
+
         for shortcut in shortcuts.values():
             # using griddb to find nearest match
             if shortcut["AppName"].isnumeric():
