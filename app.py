@@ -126,8 +126,19 @@ class GUI():
                         shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, game_name=selected_game)
                         # reload the shortcut
                         self.load_shortcut("shortcuts.vdf")
-                    
-                # shortcut_converter.modify_shortcut("shortcuts.vdf")
+            
+            if self.event == "-REPLACE_APPID-":
+                # which entry to update?
+                if len(self.values["-SHORTCUT_LIST-"]) > 0:
+                    selected = self.values["-SHORTCUT_LIST-"][0]
+                    shortcut_index = self.shortcut_names.index(selected)
+                    # which game to replace with?
+                    if len(self.values["-APPID_LIST-"]) > 0:
+                        selected_appid = self.values["-APPID_LIST-"][0]
+                        # replace the game name
+                        shortcut_converter.modify_shortcut("shortcuts.vdf", shortcut_index, appid=selected_appid)
+                        # reload the shortcut
+                        self.load_shortcut("shortcuts.vdf")
 
             if self.event == "-GAMENAME_LIST-":
                 # prevent clicking empty list
