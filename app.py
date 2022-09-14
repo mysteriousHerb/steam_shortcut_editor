@@ -22,14 +22,15 @@ class GUI():
         self.shortcut_path = os.path.join(shortcut_path, os.listdir(shortcut_path)[0], "config/shortcuts.vdf")
         self.logo_url = "https://i.imgur.com/dHLVSds.png"
 
-    def download_image(self, url=""):
+    def download_image(self, url="", resize=True):
         # download image
         if url == "":
             url = self.logo_url
         response = requests.get(url)
         # use pillow to convert the image as png
         img = Image.open(BytesIO(response.content))
-        img = img.resize((120*2, 45*2), Image.Resampling.LANCZOS)
+        if resize:
+            img = img.resize((120*2, 45*2), Image.Resampling.LANCZOS)
         png_bio = BytesIO()
         img.save(png_bio, format="PNG")
         png_data = png_bio.getvalue()
@@ -191,7 +192,8 @@ class GUI():
 
         game_name_list = appid_list = []
         # Create the window
-        self.window = sg.Window("Steam shortcut manager", layout, resizable=True, size=(900, 400))
+        icon_file = self.download_image("https://i.imgur.com/5r5UjYK.png", resize=False)
+        self.window = sg.Window("Steam shortcut manager", layout, resizable=True, icon=icon_file, size=(900, 400))
         
         
         # Display and interact with the Window using an Event Loop

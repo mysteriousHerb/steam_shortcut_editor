@@ -7,4 +7,4 @@ allow you to modify the shortcuts file quickly and set game name to be the appid
 ![](data/usage_demo.gif)
 
 ### How to build
-/home/deck/anaconda3/bin/python -m PyInstaller app.py --noconfirm  --onefile --name shortcut_editor
+/home/deck/anaconda3/bin/python -m PyInstaller app.py --noconfirm  --onefile --name shortcut_editor --icon="data/logo_square.ico"
