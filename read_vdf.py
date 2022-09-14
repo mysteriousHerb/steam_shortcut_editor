@@ -23,6 +23,8 @@ class ShortcutConverter():
             shortcuts[str(index)]["AppName"] = game_name
         if appid:
             shortcuts[str(index)]["AppName"] = appid
+            # shortcuts[str(index)]["appid"] = appid
+
 
         dump = vdf.binary_dumps({"shortcuts": shortcuts})
         with open(shortcut_path, 'wb+') as appinfo:

@@ -17,12 +17,15 @@ import shutil
 class GUI():
     def __init__(self):
         self.shortcut_converter = ShortcutConverter()
-        self.shortcut_path = "shortcuts.vdf"
+        # default path
+        shortcut_path = r"/home/deck/.local/share/Steam/userdata/"
+        self.shortcut_path = os.path.join(shortcut_path, os.listdir(shortcut_path)[0], "config/shortcuts.vdf")
+        self.logo_url = "https://i.imgur.com/dHLVSds.png"
 
-    def download_image(self, url):
+    def download_image(self, url=""):
         # download image
         if url == "":
-            url = "https://cdn.cloudflare.steamstatic.com/steam/bundles/23298/z3zxfi0uzu461hup/capsule_sm_120.jpg?t=1639599437"
+            url = self.logo_url
         response = requests.get(url)
         # use pillow to convert the image as png
         img = Image.open(BytesIO(response.content))
@@ -135,6 +138,8 @@ class GUI():
         # Define the window's contents
 
         shortcut_converter = ShortcutConverter()
+        
+        png_data = self.download_image()
 
         top_row = [
             [
@@ -178,7 +183,7 @@ class GUI():
 
         column_4 = [
             [
-                sg.Image("logo_wide_small.png", key="-IMAGE-", size = (120*2, 45*2)),
+                sg.Image(png_data, key="-IMAGE-", size = (120*2, 45*2)),
             ]
         ]
 
@@ -204,7 +209,8 @@ class GUI():
                 self.find_steam_game()
                 self.refresh_selection("shortcut_list")
                 # change MANUAL_NAME to the selected game name
-                self.window["-MANUAL_NAME-"].update(self.values["-SHORTCUT_LIST-"][0].split("#")[1])
+                if len(self.values["-SHORTCUT_LIST-"]) > 0:
+                    self.window["-MANUAL_NAME-"].update(self.values["-SHORTCUT_LIST-"][0].split("#")[1])
 
             # update the game name
             if self.event == "-REPLACE_NAME-":

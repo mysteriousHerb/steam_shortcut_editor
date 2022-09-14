@@ -1,0 +1,7 @@
+vdf = "*"
+requests = "*"
+beautifulsoup4 = "*"
+pysimplegui = "*"
+pillow = "*"
+pyinstaller = "*"
+psgcompiler = "*"
